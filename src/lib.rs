@@ -84,10 +84,10 @@ pub(crate) fn download<Asset: ReleaseAsset>(
 
         src.consume(n);
 
-        downloaded += u64::min(total_size, downloaded + n as u64);
+        downloaded = u64::min(total_size, downloaded + n as u64);
 
         if let Some(ref download_callback) = download_callback {
-            download_callback(f32::max(downloaded as f32 / total_size as f32, 1.0));
+            download_callback(f32::min(downloaded as f32 / total_size as f32, 1.0));
         }
     }
 
