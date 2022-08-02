@@ -46,14 +46,13 @@ pub(crate) fn download<Asset: ReleaseAsset>(
     let mut additional_headers = additional_headers;
     additional_headers.insert(header::USER_AGENT, "rust-reqwest/updater".parse().unwrap());
     additional_headers.insert(header::ACCEPT, "application/octet-stream".parse().unwrap());
-    println!("headers: {:?}", additional_headers);
+
     let response = reqwest::blocking::Client::new()
         .get(&asset.get_download_url())
         .headers(additional_headers)
         .send()?;
 
     if response.status() != StatusCode::OK {
-        println!("{}", asset.get_download_url());
         return Err(Error::http(response.status()));
     }
 
