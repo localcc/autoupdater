@@ -6,8 +6,8 @@ keywords = ["autoupdater", "updater", "update"]
 homepage = "https://github.com/localcc/autoupdater"
 repository = "https://github.com/localcc/autoupdater"
 readme = "README.md"
-license-file = "LICENSE"
-version = "0.1.0"
+license = "MIT"
+version = "0.1.1"
 edition = "2021"
 
 [dependencies]
