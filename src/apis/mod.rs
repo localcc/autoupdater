@@ -11,7 +11,7 @@ lazy_static! {
     static ref SIMPLE_VERSION_REGEX: Regex = Regex::new(r"(\d+)\.(\d+)\.(\d+)").unwrap();
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 struct SimpleTag {
     pub major: i32,
     pub minor: i32,

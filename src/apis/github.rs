@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, fmt::Display};
 
 use reqwest::header::{self, HeaderMap};
 use serde::Deserialize;
@@ -7,10 +7,17 @@ use crate::{error::Error, ReleaseAsset};
 
 use super::{DownloadApiTrait, SimpleTag};
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Deserialize, Clone)]
 pub struct GithubAsset {
     pub name: String,
     pub url: String,
+}
+
+impl Display for GithubAsset {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Name: {}", self.name)?;
+        writeln!(f, "Name: {}", self.url)
+    }
 }
 
 impl ReleaseAsset for GithubAsset {
@@ -31,7 +38,7 @@ impl ReleaseAsset for GithubAsset {
     }
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Deserialize, Clone)]
 pub struct GithubRelease {
     pub tag_name: String,
     pub target_commitish: String,
@@ -40,6 +47,22 @@ pub struct GithubRelease {
     pub assets: Vec<GithubAsset>,
 }
 
+impl Display for GithubRelease {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Tag: {}", self.tag_name)?;
+        writeln!(f, "Branch: {}", self.target_commitish)?;
+        writeln!(f, "Name: {}", self.name)?;
+        writeln!(f, "Prerelease: {}", self.prerelease)?;
+        writeln!(f, "Assets:")?;
+        for asset in &self.assets {
+            writeln!(f, "{}", asset)?;
+        }
+
+        Ok(())
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub struct GithubApi {
     api_url: Option<String>,
     owner: String,
