@@ -45,6 +45,7 @@ pub struct GithubRelease {
     pub name: String,
     pub prerelease: bool,
     pub assets: Vec<GithubAsset>,
+    pub body: String,
 }
 
 impl Display for GithubRelease {
