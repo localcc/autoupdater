@@ -107,7 +107,7 @@ pub(crate) fn download<Asset: ReleaseAsset>(
     let old_executable = current_executable.with_extension("exe.old");
     let updated = current_executable.with_extension("updated");
 
-    fs::remove_file(&old_executable)?;
+    fs::remove_file(&old_executable).ok();
     fs::rename(&current_executable, &old_executable)?;
     fs::copy(&tmp_file, &updated)?;
     fs::rename(&updated, &current_executable)?;
