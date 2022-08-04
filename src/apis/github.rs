@@ -176,10 +176,9 @@ impl GithubApi {
         releases
             .iter()
             .filter(|e| {
-                let prerelease = match self.prerelease {
-                    true => true,
-                    false => !e.prerelease,
-                };
+                if !self.prerelease && e.prerelease {
+                    return false;
+                }
                 let specific_tag = match self.specific_tag {
                     Some(ref tag) => *tag == e.tag_name,
                     None => true,
@@ -195,7 +194,7 @@ impl GithubApi {
                     None => true,
                 };
 
-                prerelease && specific_tag && branch && asset_name
+                specific_tag && branch && asset_name
             })
             .collect()
     }
