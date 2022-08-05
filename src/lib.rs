@@ -98,9 +98,10 @@ pub(crate) fn download<Asset: ReleaseAsset>(
 
     #[cfg(not(windows))]
     {
+        use std::os::unix::fs::PermissionsExt;
         let mut permissions = fs::metadata(&tmp_file)?.permissions();
         permissions.set_mode(0o755);
-        fs::set_permissions(tmp_file, permissions)?;
+        fs::set_permissions(&tmp_file, permissions)?;
     }
 
     let current_executable = env::current_exe()?;
