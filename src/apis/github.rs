@@ -171,34 +171,33 @@ impl GithubApi {
         Ok(release_list)
     }
 
+    fn filter_release(&self, e: &GithubRelease) -> bool {
+        if !self.prerelease && e.prerelease {
+            return false;
+        }
+        let specific_tag = match self.specific_tag {
+            Some(ref tag) => *tag == e.tag_name,
+            None => true,
+        };
+
+        let branch = match self.branch {
+            Some(ref branch) => *branch == e.target_commitish,
+            None => true,
+        };
+
+        let asset_name = match self.asset_name {
+            Some(ref asset_name) => e.assets.iter().any(|e| e.name == *asset_name),
+            None => true,
+        };
+
+        specific_tag && branch && asset_name
+    }
+
     fn match_releases<'releases>(
         &self,
         releases: &'releases [GithubRelease],
     ) -> Vec<&'releases GithubRelease> {
-        releases
-            .iter()
-            .filter(|e| {
-                if !self.prerelease && e.prerelease {
-                    return false;
-                }
-                let specific_tag = match self.specific_tag {
-                    Some(ref tag) => *tag == e.tag_name,
-                    None => true,
-                };
-
-                let branch = match self.branch {
-                    Some(ref branch) => *branch == e.target_commitish,
-                    None => true,
-                };
-
-                let asset_name = match self.asset_name {
-                    Some(ref asset_name) => e.assets.iter().any(|e| e.name == *asset_name),
-                    None => true,
-                };
-
-                specific_tag && branch && asset_name
-            })
-            .collect()
+        releases.iter().filter(|e| self.filter_release(e)).collect()
     }
 
     /// Gets the latest release
@@ -241,7 +240,7 @@ impl GithubApi {
     }
 
     /// Gets all releases
-    /// NOTE: this is kinda slow so use only if you need it
+    /// NOTE: this is kinda slow so use it only if you need it
     pub fn get_all(&self) -> Result<Vec<GithubRelease>, Error> {
         let mut releases = Vec::new();
         let mut page = 1;
@@ -255,7 +254,10 @@ impl GithubApi {
             page += 1;
         }
 
-        Ok(releases)
+        Ok(releases
+            .into_iter()
+            .filter(|e| self.filter_release(&e))
+            .collect::<Vec<_>>())
     }
 
     /// Gets the newest release if the newest release is newer than the current one.
