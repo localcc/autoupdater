@@ -76,6 +76,8 @@ pub struct GithubApi {
     asset_name: Option<String>,
 }
 
+type SortFunc = Box<dyn Fn(&str, &str) -> Ordering>;
+
 impl GithubApi {
     pub fn new(owner: &str, repo: &str) -> Self {
         GithubApi {
@@ -230,13 +232,36 @@ impl GithubApi {
         Ok((*latest_release).clone())
     }
 
+    /// Gets the latest release
+    pub fn get_latest<Sort: Fn(&str, &str) -> Ordering>(
+        &self,
+        sort_func: &Option<Sort>,
+    ) -> Result<GithubRelease, Error> {
+        self.send(sort_func)
+    }
+
+    /// Gets all releases
+    /// NOTE: this is kinda slow so use only if you need it
+    pub fn get_all(&self) -> Result<Vec<GithubRelease>, Error> {
+        let mut releases = Vec::new();
+        let mut page = 1;
+        loop {
+            let fetched_releases = self.get_releases(100, page)?;
+            if fetched_releases.is_empty() {
+                break;
+            }
+
+            releases.extend(fetched_releases);
+            page += 1;
+        }
+
+        Ok(releases)
+    }
+
     /// Gets the newest release if the newest release is newer than the current one.
     ///
     /// sort_func is used to compare two release versions if the format is not x.y.z
-    pub fn get_newer(
-        &self,
-        sort_func: &Option<Box<dyn Fn(&str, &str) -> Ordering>>,
-    ) -> Result<Option<GithubRelease>, Error> {
+    pub fn get_newer(&self, sort_func: &Option<SortFunc>) -> Result<Option<GithubRelease>, Error> {
         let latest_release = self.send(sort_func)?;
         let is_newer = match self.current_version {
             Some(ref current_version) => {
