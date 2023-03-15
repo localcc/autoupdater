@@ -48,7 +48,7 @@ pub(crate) fn download<Asset: ReleaseAsset>(
     let response = request.call()?;
 
     if response.status_text() != "OK" {
-        return Err(Error::http(response.status_text()));
+        return Err(Error::Http(response.status_text().to_string()));
     }
 
     set_ssl_vars!();

@@ -199,7 +199,7 @@ impl GithubApi {
 
         let mut matching = self.match_releases(&releases);
         if matching.is_empty() {
-            return Err(Error::no_release());
+            return Err(Error::NoRelease);
         }
 
         match sort_func {
@@ -209,7 +209,7 @@ impl GithubApi {
             None => matching.sort_by(|a, b| SimpleTag::simple_compare(&a.tag_name, &b.tag_name)),
         };
 
-        let latest_release = matching.last().ok_or_else(Error::no_release)?;
+        let latest_release = matching.last().ok_or(Error::NoRelease)?;
         Ok((*latest_release).clone())
     }
 

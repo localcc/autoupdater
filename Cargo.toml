@@ -14,3 +14,4 @@ edition = "2021"
 ureq = { version = "2.6", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 tempfile = "3.4"
+thiserror = "1.0"
