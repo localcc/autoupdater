@@ -16,10 +16,10 @@ mod macros;
 
 pub trait ReleaseAsset {
     /// Gets asset filename
-    fn get_name(&self) -> String;
+    fn get_name(&self) -> &str;
 
     /// Gets asset download url
-    fn get_download_url(&self) -> String;
+    fn get_download_url(&self) -> &str;
 
     /// Downloads asset.
     /// This function can be used directly or with the api through which the asset was fetched.
@@ -48,7 +48,7 @@ pub(crate) fn download<Asset: ReleaseAsset>(
     additional_headers.insert(header::ACCEPT, "application/octet-stream".parse().unwrap());
 
     let response = reqwest::blocking::Client::new()
-        .get(&asset.get_download_url())
+        .get(asset.get_download_url())
         .headers(additional_headers)
         .send()?;
 
@@ -62,7 +62,7 @@ pub(crate) fn download<Asset: ReleaseAsset>(
         .prefix(&format!("{}_dl", asset.get_name()))
         .tempdir()?;
 
-    let tmp_file = tmp_dir.path().join(&asset.get_name());
+    let tmp_file = tmp_dir.path().join(asset.get_name());
     let mut updated_file = File::create(&tmp_file)?;
 
     let total_size = response.content_length().unwrap_or(0);

@@ -21,12 +21,12 @@ impl Display for GithubAsset {
 }
 
 impl ReleaseAsset for GithubAsset {
-    fn get_name(&self) -> String {
-        self.name.clone()
+    fn get_name(&self) -> &str {
+        &self.name
     }
 
-    fn get_download_url(&self) -> String {
-        self.url.clone()
+    fn get_download_url(&self) -> &str {
+        &self.url
     }
 
     fn download(
@@ -94,43 +94,43 @@ impl GithubApi {
     }
 
     /// Sets custom github api url
-    pub fn api_url(&mut self, api_url: &str) -> &mut Self {
+    pub fn api_url(mut self, api_url: &str) -> Self {
         self.api_url = Some(api_url.to_string());
         self
     }
 
     /// Sets auth token.
-    pub fn auth_token(&mut self, auth_token: &str) -> &mut Self {
+    pub fn auth_token(mut self, auth_token: &str) -> Self {
         self.auth_token = Some(auth_token.to_string());
         self
     }
 
     /// Sets branch from which to get releases.
-    pub fn branch(&mut self, branch: &str) -> &mut Self {
+    pub fn branch(mut self, branch: &str) -> Self {
         self.branch = Some(branch.to_string());
         self
     }
 
     /// Sets if prerelease should be included in the list of releases.
-    pub fn prerelease(&mut self, prerelease: bool) -> &mut Self {
+    pub fn prerelease(mut self, prerelease: bool) -> Self {
         self.prerelease = prerelease;
         self
     }
 
     /// Sets specific version tag to get.
-    pub fn specific_tag(&mut self, specific_tag: &str) -> &mut Self {
+    pub fn specific_tag(mut self, specific_tag: &str) -> Self {
         self.specific_tag = Some(specific_tag.to_string());
         self
     }
 
     /// Sets current version of the application, this is used to determine if the latest release is newer than the current version.
-    pub fn current_version(&mut self, current_version: &str) -> &mut Self {
+    pub fn current_version(mut self, current_version: &str) -> Self {
         self.current_version = Some(current_version.to_string());
         self
     }
 
     /// Sets asset name to download.
-    pub fn asset_name(&mut self, asset_name: &str) -> &mut Self {
+    pub fn asset_name(mut self, asset_name: &str) -> Self {
         self.asset_name = Some(asset_name.to_string());
         self
     }
@@ -163,7 +163,7 @@ impl GithubApi {
         }
 
         let response = reqwest::blocking::Client::new()
-            .get(&api_url)
+            .get(api_url)
             .headers(headers)
             .send()?;
 
@@ -256,7 +256,7 @@ impl GithubApi {
 
         Ok(releases
             .into_iter()
-            .filter(|e| self.filter_release(&e))
+            .filter(|e| self.filter_release(e))
             .collect::<Vec<_>>())
     }
 

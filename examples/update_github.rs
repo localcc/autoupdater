@@ -6,8 +6,8 @@ use std::error::Error;
 use autoupdater::apis::DownloadApiTrait;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut api = autoupdater::apis::github::GithubApi::new("localcc", "somerepo");
-    api.current_version(cargo_crate_version!());
+    let api = autoupdater::apis::github::GithubApi::new("localcc", "somerepo")
+        .current_version(cargo_crate_version!());
 
     let download = api.get_newer(&None)?;
     println!("{:?}", download);
