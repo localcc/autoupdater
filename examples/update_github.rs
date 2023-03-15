@@ -1,8 +1,6 @@
-#[macro_use]
-extern crate autoupdater;
-
 use autoupdater::{
     apis::{github::GithubApi, DownloadApiTrait},
+    cargo_crate_version,
     error::Error,
 };
 

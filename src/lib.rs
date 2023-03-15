@@ -24,7 +24,7 @@ pub trait ReleaseAsset {
     /// download_callback parameter value is 0..1 float value indicating the download progress.
     ///
     /// * Errors:
-    ///    * `reqwest` errors
+    ///    * `ureq` errors
     ///    * `std::io::Error` io errors when writing/replacing asset files
     ///
     fn download(
@@ -40,7 +40,7 @@ pub(crate) fn download<Asset: ReleaseAsset>(
     download_callback: Option<impl Fn(f32)>,
 ) -> Result<(), Error> {
     let mut request = ureq::get(asset.get_download_url())
-        .set("user-agent", "rust-reqwest/updater")
+        .set("user-agent", "rust-ureq/updater")
         .set("accept", "application/octet-stream");
     for (header, value) in additional_headers {
         request = request.set(header, value);

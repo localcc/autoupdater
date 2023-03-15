@@ -144,7 +144,7 @@ impl GithubApi {
             page
         );
 
-        let mut request = ureq::get(&api_url).set("user-agent", "rust-reqwest/updater");
+        let mut request = ureq::get(&api_url).set("user-agent", "rust-ureq/updater");
         if let Some(token) = &self.auth_token {
             request = request.set("authorization", token);
         }

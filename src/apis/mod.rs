@@ -14,8 +14,8 @@ struct SimpleTag {
 impl SimpleTag {
     pub fn from_str(data: &str) -> Option<SimpleTag> {
         let mut ver = data
-            .trim_start_matches(char::is_alphabetic)
-            .trim_end_matches(char::is_alphabetic)
+            .trim_start_matches(|ch: char| !ch.is_numeric())
+            .trim_end_matches(|ch: char| !ch.is_numeric())
             .split('.')
             .map(str::parse)
             .filter_map(Result::ok);
@@ -44,7 +44,7 @@ pub trait DownloadApiTrait {
     /// download_callback parameter value is 0..1 float value indicating the download progress.
     ///
     /// * Errors:
-    ///    * `reqwest` errors
+    ///    * `ureq` errors
     ///    * `std::io::Error` io errors when writing/replacing asset files
     ///
     fn download<Asset: ReleaseAsset>(
