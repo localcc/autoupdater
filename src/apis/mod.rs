@@ -50,6 +50,6 @@ pub trait DownloadApiTrait {
     fn download<Asset: ReleaseAsset>(
         &self,
         asset: &Asset,
-        download_callback: Option<Box<dyn Fn(f32)>>,
+        download_callback: Option<impl Fn(f32)>,
     ) -> Result<(), Error>;
 }

@@ -34,14 +34,14 @@ pub trait ReleaseAsset {
     fn download(
         &self,
         additional_headers: HeaderMap,
-        download_callback: Option<Box<dyn Fn(f32)>>,
+        download_callback: Option<impl Fn(f32)>,
     ) -> Result<(), Error>;
 }
 
 pub(crate) fn download<Asset: ReleaseAsset>(
     asset: &Asset,
     additional_headers: HeaderMap,
-    download_callback: Option<Box<dyn Fn(f32)>>,
+    download_callback: Option<impl Fn(f32)>,
 ) -> Result<(), Error> {
     let mut additional_headers = additional_headers;
     additional_headers.insert(header::USER_AGENT, "rust-reqwest/updater".parse().unwrap());
