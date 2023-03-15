@@ -1,23 +1,20 @@
-#[macro_use]
-extern crate autoupdater;
+use autoupdater::{
+    apis::{github::GithubApi, DownloadApiTrait},
+    cargo_crate_version,
+    error::Error,
+    Sort,
+};
 
-use std::error::Error;
+fn main() -> Result<(), Error> {
+    let api = GithubApi::new("localcc", "somerepo").current_version(cargo_crate_version!());
 
-use autoupdater::apis::DownloadApiTrait;
-
-fn main() -> Result<(), Box<dyn Error>> {
-    let mut api = autoupdater::apis::github::GithubApi::new("localcc", "somerepo");
-    api.current_version(cargo_crate_version!());
-
-    let download = api.get_newer(&None)?;
+    let download = api.get_newer(None::<Sort>)?;
     println!("{:?}", download);
 
     if let Some(download) = download {
         api.download(
             &download.assets[0],
-            Some(Box::new(|progress| {
-                println!("Download progress {}", progress);
-            })),
+            Some(|progress| println!("Download progress {progress}")),
         )?;
     }
 

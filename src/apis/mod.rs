@@ -1,15 +1,8 @@
 use std::cmp::Ordering;
 
-use lazy_static::lazy_static;
-use regex::Regex;
-
 use crate::{error::Error, ReleaseAsset};
 
 pub mod github;
-
-lazy_static! {
-    static ref SIMPLE_VERSION_REGEX: Regex = Regex::new(r"(\d+)\.(\d+)\.(\d+)").unwrap();
-}
 
 #[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 struct SimpleTag {
@@ -20,15 +13,17 @@ struct SimpleTag {
 
 impl SimpleTag {
     pub fn from_str(data: &str) -> Option<SimpleTag> {
-        let version = SIMPLE_VERSION_REGEX.captures(data)?;
-        let major = version.get(1)?.as_str().parse::<i32>().ok()?;
-        let minor = version.get(2)?.as_str().parse::<i32>().ok()?;
-        let patch = version.get(3)?.as_str().parse::<i32>().ok()?;
+        let mut ver = data
+            .trim_start_matches(|ch: char| !ch.is_numeric())
+            .trim_end_matches(|ch: char| !ch.is_numeric())
+            .split('.')
+            .map(str::parse)
+            .filter_map(Result::ok);
 
         Some(SimpleTag {
-            major,
-            minor,
-            patch,
+            major: ver.next()?,
+            minor: ver.next()?,
+            patch: ver.next()?,
         })
     }
 
@@ -49,12 +44,12 @@ pub trait DownloadApiTrait {
     /// download_callback parameter value is 0..1 float value indicating the download progress.
     ///
     /// * Errors:
-    ///    * `reqwest` errors
+    ///    * `ureq` errors
     ///    * `std::io::Error` io errors when writing/replacing asset files
     ///
     fn download<Asset: ReleaseAsset>(
         &self,
         asset: &Asset,
-        download_callback: Option<Box<dyn Fn(f32)>>,
+        download_callback: Option<impl Fn(f32)>,
     ) -> Result<(), Error>;
 }
