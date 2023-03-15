@@ -75,8 +75,6 @@ pub struct GithubApi {
     asset_name: Option<String>,
 }
 
-type SortFunc = Box<dyn Fn(&str, &str) -> Ordering>;
-
 impl GithubApi {
     pub fn new(owner: &str, repo: &str) -> Self {
         GithubApi {
@@ -183,9 +181,9 @@ impl GithubApi {
     }
 
     /// Gets the latest release
-    pub fn send<Sort: Fn(&str, &str) -> Ordering>(
+    pub fn send(
         &self,
-        sort_func: &Option<Sort>,
+        sort_func: Option<&impl Fn(&str, &str) -> Ordering>,
     ) -> Result<GithubRelease, Error> {
         let mut releases = self.get_releases(100, 1)?;
 
@@ -214,9 +212,9 @@ impl GithubApi {
     }
 
     /// Gets the latest release
-    pub fn get_latest<Sort: Fn(&str, &str) -> Ordering>(
+    pub fn get_latest(
         &self,
-        sort_func: &Option<Sort>,
+        sort_func: Option<&impl Fn(&str, &str) -> Ordering>,
     ) -> Result<GithubRelease, Error> {
         self.send(sort_func)
     }
@@ -245,7 +243,10 @@ impl GithubApi {
     /// Gets the newest release if the newest release is newer than the current one.
     ///
     /// sort_func is used to compare two release versions if the format is not x.y.z
-    pub fn get_newer(&self, sort_func: &Option<SortFunc>) -> Result<Option<GithubRelease>, Error> {
+    pub fn get_newer(
+        &self,
+        sort_func: Option<&impl Fn(&str, &str) -> Ordering>,
+    ) -> Result<Option<GithubRelease>, Error> {
         let latest_release = self.send(sort_func)?;
         let is_newer = match self.current_version {
             Some(ref current_version) => {

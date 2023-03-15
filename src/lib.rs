@@ -10,6 +10,9 @@ pub mod apis;
 pub mod error;
 mod macros;
 
+pub type Sort = &'static Box<dyn Fn(&str, &str) -> std::cmp::Ordering>;
+pub type Download = Box<dyn Fn(f32)>;
+
 pub trait ReleaseAsset {
     /// Gets asset filename
     fn get_name(&self) -> &str;
