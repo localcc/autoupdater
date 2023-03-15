@@ -1,6 +1,5 @@
 use std::{cmp::Ordering, fmt::Display};
 
-use reqwest::header::{self, HeaderMap};
 use serde::Deserialize;
 
 use crate::{error::Error, ReleaseAsset};
@@ -31,7 +30,7 @@ impl ReleaseAsset for GithubAsset {
 
     fn download(
         &self,
-        additional_headers: HeaderMap,
+        additional_headers: Vec<(&str, &str)>,
         download_callback: Option<impl Fn(f32)>,
     ) -> Result<(), Error> {
         crate::download(self, additional_headers, download_callback)
@@ -101,7 +100,7 @@ impl GithubApi {
 
     /// Sets auth token.
     pub fn auth_token(mut self, auth_token: &str) -> Self {
-        self.auth_token = Some(auth_token.to_string());
+        self.auth_token = Some(format!("auth {auth_token}"));
         self
     }
 
@@ -145,27 +144,12 @@ impl GithubApi {
             page
         );
 
-        let mut headers = HeaderMap::new();
-        headers.insert(
-            header::USER_AGENT,
-            "rust-reqwest/updater".parse().expect("Invalid user agent"),
-        );
-
+        let mut request = ureq::get(&api_url).set("user-agent", "rust-reqwest/updater");
         if let Some(token) = &self.auth_token {
-            headers.insert(
-                header::AUTHORIZATION,
-                format!("token {}", token)
-                    .parse()
-                    .expect("Invalid authorization"),
-            );
+            request = request.set("authorization", token);
         }
 
-        let response = reqwest::blocking::Client::new()
-            .get(api_url)
-            .headers(headers)
-            .send()?;
-
-        let release_list: Vec<GithubRelease> = response.json()?;
+        let release_list: Vec<GithubRelease> = request.call()?.into_json()?;
         Ok(release_list)
     }
 
@@ -289,15 +273,10 @@ impl DownloadApiTrait for GithubApi {
         asset: &Asset,
         download_callback: Option<impl Fn(f32)>,
     ) -> Result<(), Error> {
-        let mut headers = HeaderMap::new();
+        let mut headers = Vec::new();
 
-        if let Some(token) = &self.auth_token {
-            headers.insert(
-                header::AUTHORIZATION,
-                format!("token {}", token)
-                    .parse()
-                    .expect("Invalid authorization"),
-            );
+        if let Some(token) = self.auth_token.as_deref() {
+            headers.push(("authorization", token));
         }
 
         asset.download(headers, download_callback)

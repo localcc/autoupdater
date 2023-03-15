@@ -1,22 +1,20 @@
 use std::{error, fmt::Display, io};
 
-use reqwest::StatusCode;
-
 #[derive(Debug)]
 pub enum ErrorCode {
     NoRelease,
-    Http(StatusCode),
-    Reqwest(reqwest::Error),
+    Http(String),
+    Ureq(Box<ureq::Error>),
     Io(io::Error),
 }
 
 impl Display for ErrorCode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ErrorCode::Reqwest(e) => write!(f, "{}", e),
-            ErrorCode::NoRelease => write!(f, "Failed to find a release matching requirements"),
-            ErrorCode::Io(e) => write!(f, "{}", e),
-            ErrorCode::Http(code) => write!(f, "HTTP Response code: {}", code),
+            ErrorCode::Ureq(e) => write!(f, "{e}"),
+            ErrorCode::NoRelease => write!(f, "failed to find a release matching requirements"),
+            ErrorCode::Io(e) => write!(f, "{e}"),
+            ErrorCode::Http(e) => write!(f, "{e}"),
         }
     }
 }
@@ -33,9 +31,9 @@ impl Error {
         }
     }
 
-    pub fn http(code: StatusCode) -> Self {
+    pub fn http(code: &str) -> Self {
         Error {
-            code: ErrorCode::Http(code),
+            code: ErrorCode::Http(code.to_string()),
         }
     }
 }
@@ -48,10 +46,10 @@ impl Display for Error {
     }
 }
 
-impl From<reqwest::Error> for Error {
-    fn from(e: reqwest::Error) -> Self {
+impl From<ureq::Error> for Error {
+    fn from(e: ureq::Error) -> Self {
         Error {
-            code: ErrorCode::Reqwest(e),
+            code: ErrorCode::Ureq(Box::new(e)),
         }
     }
 }
