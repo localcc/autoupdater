@@ -138,9 +138,7 @@ impl GithubApi {
     fn get_releases(&self, per_page: i32, page: i32) -> Result<Vec<GithubRelease>, Error> {
         let api_url = format!(
             "https://{}/repos/{}/{}/releases?per_page={}&page={}",
-            self.api_url
-                .clone()
-                .unwrap_or_else(|| "api.github.com".to_string()),
+            self.api_url.as_deref().unwrap_or("api.github.com"),
             self.owner,
             self.repo,
             per_page,

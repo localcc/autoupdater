@@ -1,15 +1,8 @@
 use std::cmp::Ordering;
 
-use lazy_static::lazy_static;
-use regex::Regex;
-
 use crate::{error::Error, ReleaseAsset};
 
 pub mod github;
-
-lazy_static! {
-    static ref SIMPLE_VERSION_REGEX: Regex = Regex::new(r"(\d+)\.(\d+)\.(\d+)").unwrap();
-}
 
 #[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 struct SimpleTag {
@@ -20,15 +13,17 @@ struct SimpleTag {
 
 impl SimpleTag {
     pub fn from_str(data: &str) -> Option<SimpleTag> {
-        let version = SIMPLE_VERSION_REGEX.captures(data)?;
-        let major = version.get(1)?.as_str().parse::<i32>().ok()?;
-        let minor = version.get(2)?.as_str().parse::<i32>().ok()?;
-        let patch = version.get(3)?.as_str().parse::<i32>().ok()?;
+        let mut ver = data
+            .trim_start_matches(char::is_alphabetic)
+            .trim_end_matches(char::is_alphabetic)
+            .split('.')
+            .map(str::parse)
+            .filter_map(Result::ok);
 
         Some(SimpleTag {
-            major,
-            minor,
-            patch,
+            major: ver.next()?,
+            minor: ver.next()?,
+            patch: ver.next()?,
         })
     }
 
